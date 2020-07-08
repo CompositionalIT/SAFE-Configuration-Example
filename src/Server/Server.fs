@@ -14,10 +14,7 @@ open System.Reflection
 open Microsoft.Extensions.Configuration.UserSecrets
 open System.Diagnostics
 
-type AnyType =
-    {
-        Something : int
-    }
+type AnyType = AnyType
 
 let thisAssembly =
     let assembly = typeof<AnyType>.Assembly
@@ -52,14 +49,12 @@ let webApp next ctx =
     }
 
 let addSecretsConfig (cfg : IConfiguration) =
-    //let cfg =
-    //    ConfigurationBuilder()
-    //        //.AddConfiguration(cfg)
-    //        //.AddUserSecrets(assembly = thisAssembly, optional = false, reloadOnChange = true)
-    //        .AddJsonFile("testSettings.json")
-    //        .Build()
-    //        :> IConfiguration
-    cfg.["MySetting"] <- "Hello from Hack" 
+    let extraCfg =
+        ConfigurationBuilder()
+            .AddUserSecrets<AnyType>()
+            .Build()
+    extraCfg.AsEnumerable()
+    |> Seq.iter (fun kvp -> cfg.[kvp.Key] <- kvp.Value)
 
 let app =
     application {
