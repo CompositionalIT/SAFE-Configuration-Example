@@ -51,16 +51,20 @@ let webApp next ctx =
         return! handler next ctx
     }
 
-let addSecretsConfig cfg =
-    ConfigurationBuilder()
-        .AddConfiguration(cfg)
-        .AddUserSecrets(assembly = thisAssembly, optional = false, reloadOnChange = true)
-        .Build()
+let addSecretsConfig (cfg : IConfiguration) =
+    //let cfg =
+    //    ConfigurationBuilder()
+    //        //.AddConfiguration(cfg)
+    //        //.AddUserSecrets(assembly = thisAssembly, optional = false, reloadOnChange = true)
+    //        .AddJsonFile("testSettings.json")
+    //        .Build()
+    //        :> IConfiguration
+    cfg.["MySetting"] <- "Hello from Hack" 
 
 let app =
     application {
-        use_config (fun cfg -> addSecretsConfig cfg)
         url "http://0.0.0.0:8085"
+        use_config (fun cfg -> addSecretsConfig cfg)
         use_router webApp
         memory_cache
         use_static "public"
