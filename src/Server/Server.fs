@@ -12,8 +12,19 @@ open System
 open Shared
 open System.Reflection
 open Microsoft.Extensions.Configuration.UserSecrets
+open System.Diagnostics
 
 type AnyType = AnyType
+
+let printSecretsAttr =
+    let assembly = typeof<AnyType>.Assembly
+    let secretsAttr = assembly.GetCustomAttribute<UserSecretsIdAttribute>()
+    let attrMsg = 
+        if secretsAttr |> isNotNull
+        then sprintf "*** SECRETS ATTRIBUTE KEY %s ***" secretsAttr.UserSecretsId
+        else "SECRETS ATTR NOT FOUND"
+    printfn "%s" attrMsg
+    Debug.WriteLine attrMsg
 
 let getSecret (ctx : HttpContext) key = async {
     let config = ctx.GetService<IConfiguration>()
