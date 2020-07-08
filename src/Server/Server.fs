@@ -14,9 +14,12 @@ open System.Reflection
 open Microsoft.Extensions.Configuration.UserSecrets
 open System.Diagnostics
 
-type AnyType = AnyType
+type AnyType =
+    {
+        Something : int
+    }
 
-let printSecretsAttr =
+let thisAssembly =
     let assembly = typeof<AnyType>.Assembly
     let secretsAttr = assembly.GetCustomAttribute<UserSecretsIdAttribute>()
     let attrMsg = 
@@ -25,6 +28,7 @@ let printSecretsAttr =
         else "SECRETS ATTR NOT FOUND"
     printfn "%s" attrMsg
     Debug.WriteLine attrMsg
+    assembly
 
 let getSecret (ctx : HttpContext) key = async {
     let config = ctx.GetService<IConfiguration>()
@@ -50,13 +54,13 @@ let webApp next ctx =
 let addSecretsConfig cfg =
     ConfigurationBuilder()
         .AddConfiguration(cfg)
-        .AddUserSecrets<AnyType>()
+        .AddUserSecrets(assembly = thisAssembly, optional = false, reloadOnChange = true)
         .Build()
 
 let app =
     application {
-        url "http://0.0.0.0:8085"
         use_config (fun cfg -> addSecretsConfig cfg)
+        url "http://0.0.0.0:8085"
         use_router webApp
         memory_cache
         use_static "public"
