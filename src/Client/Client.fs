@@ -3,43 +3,39 @@ module Client
 open Elmish
 open Elmish.React
 open Fable.Remoting.Client
-
+open System
 open Shared
 
 type Model =
-    { Todos: Todo list
+    { Secrets: Secret list
       Input: string }
 
 type Msg =
-    | GotTodos of Todo list
     | SetInput of string
-    | AddTodo
-    | AddedTodo of Todo
+    | GetSecret
+    | GotSecret of Secret
 
-let todosApi =
+let secretsApi =
     Remoting.createApi()
     |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.buildProxy<ITodosApi>
+    |> Remoting.buildProxy<ISecretsApi>
 
 let init(): Model * Cmd<Msg> =
     let model =
-        { Todos = []
+        { Secrets = []
           Input = "" }
-    let cmd = Cmd.OfAsync.perform todosApi.getTodos () GotTodos
-    model, cmd
+    model, Cmd.none
 
 let update (msg: Msg) (model: Model): Model * Cmd<Msg> =
     match msg with
-    | GotTodos todos ->
-        { model with Todos = todos }, Cmd.none
     | SetInput value ->
         { model with Input = value }, Cmd.none
-    | AddTodo ->
-        let todo = Todo.create model.Input
-        let cmd = Cmd.OfAsync.perform todosApi.addTodo todo AddedTodo
+    | GetSecret ->
+        let key = model.Input
+        let cmd = Cmd.OfAsync.perform secretsApi.getSecret key GotSecret
         { model with Input = "" }, cmd
-    | AddedTodo todo ->
-        { model with Todos = model.Todos @ [ todo ] }, Cmd.none
+    | GotSecret secret ->
+        { model with Secrets = model.Secrets @ [ secret ] }, Cmd.none
 
 open Fable.React
 open Fable.React.Props
@@ -60,20 +56,20 @@ let containerBox (model : Model) (dispatch : Msg -> unit) =
     Box.box' [ ]
         [ Content.content [ ]
             [ Content.Ol.ol [ ]
-                [ for todo in model.Todos ->
-                    li [ ] [ str todo.Description ] ] ]
+                [ for secret in model.Secrets ->
+                    li [ ] [ str (sprintf "%s : %s" secret.Key secret.Value) ] ] ]
           Field.div [ Field.IsGrouped ]
             [ Control.p [ Control.IsExpanded ]
                 [ Input.text
                     [ Input.Value model.Input
-                      Input.Placeholder "What needs to be done?"
+                      Input.Placeholder "What secret do you want?"
                       Input.OnChange (fun x -> SetInput x.Value |> dispatch) ] ]
               Control.p [ ] [
                 Button.a [
                     Button.Color IsPrimary
-                    Button.Disabled (Todo.isValid model.Input |> not)
-                    Button.OnClick (fun _ -> dispatch AddTodo) ]
-                  [ str "Add" ] ] ] ]
+                    Button.Disabled (String.IsNullOrWhiteSpace model.Input)
+                    Button.OnClick (fun _ -> dispatch GetSecret) ]
+                  [ str "Search" ] ] ] ]
 
 let view (model : Model) (dispatch : Msg -> unit) =
     Hero.hero [

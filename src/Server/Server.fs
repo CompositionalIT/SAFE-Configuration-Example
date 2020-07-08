@@ -3,41 +3,38 @@ module Server
 open Fable.Remoting.Server
 open Fable.Remoting.Giraffe
 open Saturn
+open Giraffe
+open Microsoft.AspNetCore.Http
+open FSharp.Control.Tasks.V2
+open Microsoft.Extensions.Configuration
+open System
 
 open Shared
+open System.Reflection
+open Microsoft.Extensions.Configuration.UserSecrets
 
-type Storage () =
-    let todos = ResizeArray<_>()
+type AnyType = AnyType
 
-    member __.GetTodos () =
-        List.ofSeq todos
+let getSecret (ctx : HttpContext) key = async {
+    let config = ctx.GetService<IConfiguration>()
+    let value = config.[key]
+    if String.IsNullOrWhiteSpace(value)
+    then return { Key = key; Value = "Not found" }
+    else return { Key = key; Value = config.[key] }
+}
 
-    member __.AddTodo (todo: Todo) =
-        if Todo.isValid todo.Description then
-            todos.Add todo
-            Ok ()
-        else Error "Invalid todo"
+let secretsApi (ctx : HttpContext) =
+    { getSecret = getSecret ctx}
 
-let storage = Storage()
-
-storage.AddTodo(Todo.create "Create new SAFE project") |> ignore
-storage.AddTodo(Todo.create "Write your app") |> ignore
-storage.AddTodo(Todo.create "Ship it !!!") |> ignore
-
-let todosApi =
-    { getTodos = fun () -> async { return storage.GetTodos() }
-      addTodo =
-        fun todo -> async {
-            match storage.AddTodo todo with
-            | Ok () -> return todo
-            | Error e -> return failwith e
-        } }
-
-let webApp =
-    Remoting.createApi()
-    |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.fromValue todosApi
-    |> Remoting.buildHttpHandler
+let webApp next ctx =
+    task {
+        let handler =
+            Remoting.createApi()
+            |> Remoting.withRouteBuilder Route.builder
+            |> Remoting.fromValue (secretsApi ctx)
+            |> Remoting.buildHttpHandler
+        return! handler next ctx
+    }
 
 let app =
     application {
