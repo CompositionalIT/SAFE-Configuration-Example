@@ -1,20 +1,45 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# SAFE Template
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+This template can be used to generate a full-stack web application using the [SAFE Stack](https://safe-stack.github.io/). It was created using the dotnet [SAFE Template](https://safe-stack.github.io/docs/template-overview/). If you want to learn more about the template why not start with the [quick start](https://safe-stack.github.io/docs/quickstart/) guide?
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+## Install pre-requisites
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+You'll need to install the following pre-requisites in order to build SAFE applications
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+* The [.NET Core SDK](https://www.microsoft.com/net/download)
+* The [Yarn](https://yarnpkg.com/lang/en/docs/install/) package manager (you can also use `npm` but the usage of `yarn` is encouraged).
+* [Node LTS](https://nodejs.org/en/download/) installed for the front end components.
+
+## Work with the application
+
+Before you run the project **for the first time only** you should install its local tools with this command:
+
+```bash
+dotnet tool restore
+```
+
+To concurrently run the server and the client components in watch mode use the following command:
+
+```bash
+dotnet fake build -t run
+``
+
+Then open `http://localhost:8080` in your browser.
+
+To run concurrently server and client tests in watch mode (run in a new terminal):
+
+```bash
+dotnet fake build -t runtests
+```
+
+Client tests are available under `http://localhost:8081` in your browser and server tests are running in watch mode in console.
+
+## SAFE Stack Documentation
+
+You will find more documentation about the used F# components at the following places:
+
+* [Saturn](https://saturnframework.org/docs/)
+* [Fable](https://fable.io/docs/)
+* [Elmish](https://elmish.github.io/elmish/)
+
+If you want to know more about the full Azure Stack and all of it's components (including Azure) visit the official [SAFE documentation](https://safe-stack.github.io/docs/).
