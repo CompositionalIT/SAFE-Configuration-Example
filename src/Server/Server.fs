@@ -13,6 +13,7 @@ open Shared
 open System.Reflection
 open Microsoft.Extensions.Configuration.UserSecrets
 open System.Diagnostics
+open Microsoft.Extensions.Hosting
 
 type AnyType = AnyType
 
@@ -48,18 +49,38 @@ let webApp next ctx =
         return! handler next ctx
     }
 
-let addSecretsConfig (cfg : IConfiguration) =
-    let extraCfg =
-        ConfigurationBuilder()
-            .AddUserSecrets<AnyType>()
-            .Build()
-    extraCfg.AsEnumerable()
-    |> Seq.iter (fun kvp -> cfg.[kvp.Key] <- kvp.Value)
+let configureHost (hostBuilder : IHostBuilder) =
+    hostBuilder.ConfigureAppConfiguration(fun ctx cfg ->
+
+        // This shouldn't be necessary as Saturn already calls Host.CreateDefaultBuilder
+        // which adds secrets if in Dev environment. I think maybe the issue is that
+        // you have to pass a ref to a type from the assembly, which would be Saturn
+        // instead of this project. By passing AnyType below we actually reg our secrets.
+        if ctx.HostingEnvironment.IsDevelopment()
+        then cfg.AddUserSecrets<AnyType>() |> ignore
+
+        // This is where you enable KeyVault for production, requires installing some libs
+        //if (ctx.HostingEnvironment.IsProduction())
+        //then
+        //    let builtConfig = cfg.Build()
+
+        //    let azureServiceTokenProvider = new AzureServiceTokenProvider();
+        //    let keyVaultClient =
+        //        KeyVaultClient(
+        //            KeyVaultClient.AuthenticationCallback(
+        //                azureServiceTokenProvider.KeyVaultTokenCallback));
+
+        //    cfg.AddAzureKeyVault(
+        //        sprintf "https://%s.vault.azure.net/" builtConfig.["KeyVaultName"],
+        //        keyVaultClient,
+        //        DefaultKeyVaultSecretManager())
+    ) |> ignore
+    hostBuilder
 
 let app =
     application {
         url "http://0.0.0.0:8085"
-        use_config (fun cfg -> addSecretsConfig cfg)
+        host_config configureHost
         use_router webApp
         memory_cache
         use_static "public"
