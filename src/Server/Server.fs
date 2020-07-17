@@ -8,25 +8,11 @@ open Microsoft.AspNetCore.Http
 open FSharp.Control.Tasks.V2
 open Microsoft.Extensions.Configuration
 open System
-
-open Shared
-open System.Reflection
-open Microsoft.Extensions.Configuration.UserSecrets
-open System.Diagnostics
 open Microsoft.Extensions.Hosting
 
-type AnyType = AnyType
+open Shared
 
-let thisAssembly =
-    let assembly = typeof<AnyType>.Assembly
-    let secretsAttr = assembly.GetCustomAttribute<UserSecretsIdAttribute>()
-    let attrMsg = 
-        if secretsAttr |> isNotNull
-        then sprintf "*** SECRETS ATTRIBUTE KEY %s ***" secretsAttr.UserSecretsId
-        else "SECRETS ATTR NOT FOUND"
-    printfn "%s" attrMsg
-    Debug.WriteLine attrMsg
-    assembly
+type AnyType = AnyType
 
 let getSecret (ctx : HttpContext) key = async {
     let config = ctx.GetService<IConfiguration>()
@@ -39,15 +25,14 @@ let getSecret (ctx : HttpContext) key = async {
 let secretsApi (ctx : HttpContext) =
     { getSecret = getSecret ctx}
 
-let webApp next ctx =
-    task {
-        let handler =
-            Remoting.createApi()
-            |> Remoting.withRouteBuilder Route.builder
-            |> Remoting.fromValue (secretsApi ctx)
-            |> Remoting.buildHttpHandler
-        return! handler next ctx
-    }
+let webApp next ctx = task {
+    let handler =
+        Remoting.createApi()
+        |> Remoting.withRouteBuilder Route.builder
+        |> Remoting.fromValue (secretsApi ctx)
+        |> Remoting.buildHttpHandler
+    return! handler next ctx
+}
 
 let configureHost (hostBuilder : IHostBuilder) =
     hostBuilder.ConfigureAppConfiguration(fun ctx cfg ->
