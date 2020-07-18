@@ -9,6 +9,9 @@ open FSharp.Control.Tasks.V2
 open Microsoft.Extensions.Configuration
 open System
 open Microsoft.Extensions.Hosting
+open Microsoft.Azure.KeyVault
+open Microsoft.Azure.Services.AppAuthentication
+open Microsoft.Extensions.Configuration.AzureKeyVault
 
 open Shared
 
@@ -37,28 +40,20 @@ let webApp next ctx = task {
 let configureHost (hostBuilder : IHostBuilder) =
     hostBuilder.ConfigureAppConfiguration(fun ctx cfg ->
 
-        // This shouldn't be necessary as Saturn already calls Host.CreateDefaultBuilder
-        // which adds secrets if in Dev environment. I think maybe the issue is that
-        // you have to pass a ref to a type from the assembly, which would be Saturn
-        // instead of this project. By passing AnyType below we actually reg our secrets.
         if ctx.HostingEnvironment.IsDevelopment()
         then cfg.AddUserSecrets<AnyType>() |> ignore
 
-        // This is where you enable KeyVault for production, requires installing some libs
-        //if (ctx.HostingEnvironment.IsProduction())
-        //then
-        //    let builtConfig = cfg.Build()
+        if (ctx.HostingEnvironment.IsStaging() || ctx.HostingEnvironment.IsProduction())
+        then
+            let builtConfig = cfg.Build()
+            let tokenCallback authority resource scope =
+                AzureServiceTokenProvider().KeyVaultTokenCallback.Invoke(authority, resource, scope) 
+            let keyVaultClient = new KeyVaultClient(KeyVaultClient.AuthenticationCallback(tokenCallback))
+            cfg.AddAzureKeyVault(
+                sprintf "https://%s.vault.azure.net/" builtConfig.["KeyVaultName"],
+                keyVaultClient,
+                DefaultKeyVaultSecretManager()) |> ignore
 
-        //    let azureServiceTokenProvider = new AzureServiceTokenProvider();
-        //    let keyVaultClient =
-        //        KeyVaultClient(
-        //            KeyVaultClient.AuthenticationCallback(
-        //                azureServiceTokenProvider.KeyVaultTokenCallback));
-
-        //    cfg.AddAzureKeyVault(
-        //        sprintf "https://%s.vault.azure.net/" builtConfig.["KeyVaultName"],
-        //        keyVaultClient,
-        //        DefaultKeyVaultSecretManager())
     ) |> ignore
     hostBuilder
 

@@ -62,7 +62,7 @@ let containerBox (model : Model) (dispatch : Msg -> unit) =
             [ Control.p [ Control.IsExpanded ]
                 [ Input.text
                     [ Input.Value model.Input
-                      Input.Placeholder "What secret do you want?"
+                      Input.Placeholder "What setting do you want?"
                       Input.OnChange (fun x -> SetInput x.Value |> dispatch) ] ]
               Control.p [ ] [
                 Button.a [
@@ -94,7 +94,7 @@ let view (model : Model) (dispatch : Msg -> unit) =
                     Column.Width (Screen.All, Column.Is6)
                     Column.Offset (Screen.All, Column.Is3)
                 ] [
-                    Heading.p [ Heading.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ] [ str "SecretsExample" ]
+                    Heading.p [ Heading.Modifiers [ Modifier.TextAlignment (Screen.All, TextAlignment.Centered) ] ] [ str "Configuration Explorer" ]
                     containerBox model dispatch
                 ]
             ]
