@@ -15,8 +15,6 @@ open Microsoft.Extensions.Configuration.AzureKeyVault
 
 open Shared
 
-type AnyType = AnyType
-
 let getSetting (ctx : HttpContext) key = async {
     let config = ctx.GetService<IConfiguration>()
     let value = config.[key]
@@ -37,11 +35,12 @@ let webApp next ctx = task {
     return! handler next ctx
 }
 
+type AnyType = AnyType
 let configureHost (hostBuilder : IHostBuilder) =
     hostBuilder.ConfigureAppConfiguration(fun ctx cfg ->
 
-        if ctx.HostingEnvironment.IsDevelopment()
-        then cfg.AddUserSecrets<AnyType>() |> ignore
+        if ctx.HostingEnvironment.IsDevelopment() then
+            cfg.AddUserSecrets<AnyType>() |> ignore
 
         if (ctx.HostingEnvironment.IsStaging() || ctx.HostingEnvironment.IsProduction())
         then
