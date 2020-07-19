@@ -17,7 +17,7 @@ open Shared
 
 type AnyType = AnyType
 
-let getSecret (ctx : HttpContext) key = async {
+let getSetting (ctx : HttpContext) key = async {
     let config = ctx.GetService<IConfiguration>()
     let value = config.[key]
     if String.IsNullOrWhiteSpace(value)
@@ -25,14 +25,14 @@ let getSecret (ctx : HttpContext) key = async {
     else return { Key = key; Value = config.[key] }
 }
 
-let secretsApi (ctx : HttpContext) =
-    { getSecret = getSecret ctx}
+let configurationApi (ctx : HttpContext) =
+    { getSetting = getSetting ctx}
 
 let webApp next ctx = task {
     let handler =
         Remoting.createApi()
         |> Remoting.withRouteBuilder Route.builder
-        |> Remoting.fromValue (secretsApi ctx)
+        |> Remoting.fromValue (configurationApi ctx)
         |> Remoting.buildHttpHandler
     return! handler next ctx
 }

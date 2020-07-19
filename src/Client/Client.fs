@@ -7,22 +7,22 @@ open System
 open Shared
 
 type Model =
-    { Secrets: Secret list
+    { Settings: Setting list
       Input: string }
 
 type Msg =
     | SetInput of string
-    | GetSecret
-    | GotSecret of Secret
+    | FindSetting
+    | SettingFound of Setting
 
-let secretsApi =
+let configurationApi =
     Remoting.createApi()
     |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.buildProxy<ISecretsApi>
+    |> Remoting.buildProxy<IConfigurationApi>
 
 let init(): Model * Cmd<Msg> =
     let model =
-        { Secrets = []
+        { Settings = []
           Input = "" }
     model, Cmd.none
 
@@ -30,12 +30,12 @@ let update (msg: Msg) (model: Model): Model * Cmd<Msg> =
     match msg with
     | SetInput value ->
         { model with Input = value }, Cmd.none
-    | GetSecret ->
+    | FindSetting ->
         let key = model.Input
-        let cmd = Cmd.OfAsync.perform secretsApi.getSecret key GotSecret
+        let cmd = Cmd.OfAsync.perform configurationApi.getSetting key SettingFound
         { model with Input = "" }, cmd
-    | GotSecret secret ->
-        { model with Secrets = model.Secrets @ [ secret ] }, Cmd.none
+    | SettingFound setting ->
+        { model with Settings = model.Settings @ [ setting ] }, Cmd.none
 
 open Fable.React
 open Fable.React.Props
@@ -56,19 +56,19 @@ let containerBox (model : Model) (dispatch : Msg -> unit) =
     Box.box' [ ]
         [ Content.content [ ]
             [ Content.Ol.ol [ ]
-                [ for secret in model.Secrets ->
-                    li [ ] [ str (sprintf "%s : %s" secret.Key secret.Value) ] ] ]
+                [ for setting in model.Settings ->
+                    li [ ] [ str (sprintf "%s : %s" setting.Key setting.Value) ] ] ]
           Field.div [ Field.IsGrouped ]
             [ Control.p [ Control.IsExpanded ]
                 [ Input.text
                     [ Input.Value model.Input
-                      Input.Placeholder "What setting do you want?"
+                      Input.Placeholder "Setting Key"
                       Input.OnChange (fun x -> SetInput x.Value |> dispatch) ] ]
               Control.p [ ] [
                 Button.a [
                     Button.Color IsPrimary
                     Button.Disabled (String.IsNullOrWhiteSpace model.Input)
-                    Button.OnClick (fun _ -> dispatch GetSecret) ]
+                    Button.OnClick (fun _ -> dispatch FindSetting) ]
                   [ str "Search" ] ] ] ]
 
 let view (model : Model) (dispatch : Msg -> unit) =

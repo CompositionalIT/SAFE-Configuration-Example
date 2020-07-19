@@ -1,6 +1,6 @@
 namespace Shared
 
-type Secret =
+type Setting =
     { Key : string
       Value : string }
 
@@ -8,5 +8,5 @@ module Route =
     let builder typeName methodName =
         sprintf "/api/%s/%s" typeName methodName
 
-type ISecretsApi =
-    { getSecret : string -> Async<Secret> }
+type IConfigurationApi =
+    { getSetting : string -> Async<Setting> }
