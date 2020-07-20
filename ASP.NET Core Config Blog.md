@@ -143,9 +143,9 @@ When we want to access secrets from key vault in our application, we have a coup
 
 1. Key Vault References
 
-    If we are hosted on Azure we can use [Key Vault References](https://docs.microsoft.com/en-us/azure/app-service/app-service-key-vault-references) to define slot-level environment variables, which in turn reference values stored in our Key Vault.
+    If we are hosted on Azure we can use [Key Vault References](https://docs.microsoft.com/en-us/azure/app-service/app-service-key-vault-references) to define slot-level Application Settings, which in turn reference values stored in our Key Vault.
 
-    This is acheived by setting a specially formatted string as the Environment Variable value, which links it to the appropriate Key Vault entry:
+    This is acheived by setting a specially formatted string as the setting's value, which links it to the appropriate Key Vault entry:
 
     ```@Microsoft.KeyVault(VaultName={keyvault name};SecretName={secret name};SecretVersion={version guid})```
 
@@ -199,4 +199,4 @@ When we want to access secrets from key vault in our application, we have a coup
 
 Hopefully you can see that although there are a lot of options and moving parts to consider, it is fairly quick and easy to switch configurations and keep your secrets safe using ASP .NET Core, Azure and Saturn.
 
-A sample project demonstrating most of the features discussed in this article can be found on [our Github](www.github.com).
+A sample project demonstrating most of the features discussed in this article can be found on [our Github](www.github.com). // TODO insert link to uploaded project here!!!
