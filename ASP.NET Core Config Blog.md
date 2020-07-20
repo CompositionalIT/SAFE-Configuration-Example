@@ -13,7 +13,7 @@ ASP .NET Core has a [neat way of dealing with these concerns](https://docs.micro
 
 ## How do we define configurations?
 
-Configurations can be provided a [number of ways](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-3.1#configuration-providers). 
+Configurations can be provided a [number of ways](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-3.1#configuration-providers).
 
 They can be defined simple JSON files which commonly live at the root of your web project (usually **Server** in a SAFE Stack solution).
 
@@ -49,7 +49,7 @@ For a complete list of the commands available see [How the Secret Manager tool w
 
 ### 2.  From Visual Studio
 
-If you are using Visual Studio, you can initialise secrets by right clicking on the project and selecting **Manage User Secrets**. 
+If you are using Visual Studio, you can initialise secrets by right clicking on the project and selecting **Manage User Secrets**.
 
 This will also open the secrets.json file in the IDE, where you can edit directly.
 
@@ -57,7 +57,7 @@ Note however that the secrets file doesn't use the same nested json object forma
 ```json
 {
     "MySetting": {
-        "SubSetting": "Hello" 
+        "SubSetting": "Hello"
     }
 }
 ```
@@ -99,7 +99,7 @@ let configureHost (hostBuilder : IHostBuilder) =
     hostBuilder
         .ConfigureAppConfiguration(
             fun (context : HostBuilderContext) (config : IConfigurationBuilder) ->
-                // Add things to the configuration here, either manually or using a ConfigurationProvider 
+                // Add things to the configuration here, either manually or using a ConfigurationProvider
             ) |> ignore
     hostBuilder
 
@@ -113,7 +113,7 @@ run app
 
 > When creating the sample project for this blog post, I found that my secrets.json file wasn't being loaded even though I was in a Development environment. I suspect the reason for this is that the host requires a reference to the assembly which contains the ```<UserSecretsId>``` element in its project file, and in this case the executing assembly is Saturn instead of our project. I worked around the issue by manually adding secrets to the configuration using ```host_config``` as explained above, adding the lines
 >```fsharp
->if context.HostingEnvironment.IsDevelopment() then 
+>if context.HostingEnvironment.IsDevelopment() then
 >    config.AddUserSecrets<AnyType>() |> ignore
 >```
 > where ```AnyType``` is literally any type in the project, it is just a handle to the assembly to allow the UserSecretsId to be located.
@@ -121,7 +121,7 @@ run app
 
 ## How do we use Azure KeyVault to store our secrets?
 
-If we want to use a secure, cloud based store for our secrets, then [Azure Key Vault](https://docs.microsoft.com/en-gb/azure/key-vault/) is a great choice. 
+If we want to use a secure, cloud based store for our secrets, then [Azure Key Vault](https://docs.microsoft.com/en-gb/azure/key-vault/) is a great choice.
 
 ### How do we add a secret to KeyVault?
 
@@ -129,7 +129,7 @@ Assuming we have set up an instance of a key vault online and [authorised  our a
 ```json
 {
     "MySetting": {
-        "SubSetting": "Hello" 
+        "SubSetting": "Hello"
     }
 }
 ```
@@ -146,9 +146,9 @@ When we want to access secrets from key vault in our application, we have a coup
     If we are hosted on Azure we can use [Key Vault References](https://docs.microsoft.com/en-us/azure/app-service/app-service-key-vault-references) to define slot-level environment variables, which in turn reference values stored in our Key Vault.
 
     This is acheived by setting a specially formatted string as the Environment Variable value, which links it to the appropriate Key Vault entry:
-    
+
     ```@Microsoft.KeyVault(VaultName={keyvault name};SecretName={secret name};SecretVersion={version guid})```
-    
+
     We can choose to deploy these Application Settings with [Farmer](https://compositionalit.github.io/farmer/) or traditional ARM templates, or alternatively manually configure them in the Azure portal.
 
 
@@ -184,7 +184,7 @@ When we want to access secrets from key vault in our application, we have a coup
             then
                 let builtConfig = cfg.Build()
                 let tokenCallback authority resource scope =
-                    AzureServiceTokenProvider().KeyVaultTokenCallback.Invoke(authority, resource, scope) 
+                    AzureServiceTokenProvider().KeyVaultTokenCallback.Invoke(authority, resource, scope)
                 let keyVaultClient = new KeyVaultClient(KeyVaultClient.AuthenticationCallback(tokenCallback))
                 cfg.AddAzureKeyVault(
                     sprintf "https://%s.vault.azure.net/" builtConfig.["KeyVaultName"],
@@ -194,22 +194,8 @@ When we want to access secrets from key vault in our application, we have a coup
         ) |> ignore
         hostBuilder
 
-    ```
-    where ```appsettings.json``` looks like
-    ```json
-    {
-        "KeyVaultName": "MyProductionKeyVault"
-    }
-    ```
-    and ```appsettings.Staging.json``` looks like
-    ```json
-    {
-        "KeyVaultName": "MyStagingKeyVault"
-    }
-    ```
 
-
-### Conclusion
+## Conclusion
 
 Hopefully you can see that although there are a lot of options and moving parts to consider, it is fairly quick and easy to switch configurations and keep your secrets safe using ASP .NET Core, Azure and Saturn.
 
