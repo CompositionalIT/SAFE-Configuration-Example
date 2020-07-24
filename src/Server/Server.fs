@@ -35,12 +35,12 @@ let webApp next ctx = task {
     return! handler next ctx
 }
 
-type AnyType = AnyType
+type UserSecretsTarget = UserSecretsTarget of unit
 let configureHost (hostBuilder : IHostBuilder) =
     hostBuilder.ConfigureAppConfiguration(fun ctx cfg ->
 
         if ctx.HostingEnvironment.IsDevelopment() then
-            cfg.AddUserSecrets<AnyType>() |> ignore
+            cfg.AddUserSecrets<UserSecretsTarget>() |> ignore
 
         if (ctx.HostingEnvironment.IsStaging() || ctx.HostingEnvironment.IsProduction())
         then
