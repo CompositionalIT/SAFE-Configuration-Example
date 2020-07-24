@@ -1,6 +1,8 @@
-# SAFE Template
+# SAFE Configuration in ASP .NET Core
 
-This template can be used to generate a full-stack web application using the [SAFE Stack](https://safe-stack.github.io/). It was created using the dotnet [SAFE Template](https://safe-stack.github.io/docs/template-overview/). If you want to learn more about the template why not start with the [quick start](https://safe-stack.github.io/docs/quickstart/) guide?
+This is an example project to accompany an upcoming blog on our website (link will be provided once published).
+
+It allows you to explore the configuration of a simple SAFE application by searching for settings using their keys.
 
 ## Install pre-requisites
 
@@ -10,7 +12,15 @@ You'll need to install the following pre-requisites in order to build SAFE appli
 * The [Yarn](https://yarnpkg.com/lang/en/docs/install/) package manager (you can also use `npm` but the usage of `yarn` is encouraged).
 * [Node LTS](https://nodejs.org/en/download/) installed for the front end components.
 
-## Work with the application
+## Secrets / Key Vault
+
+There are a couple of settings already configured in appsettings.json and appsettings.Development.json for demonstration purposes. You can see how changing your environment affects the final configuration provided to the app.
+
+To see values from local secrets, you will need to initialise a secret store as explained in the blog post. By default, these will be loaded if you are in a Development environment.
+
+To access values from Key Vault you will need to set up a Key Vault instance in Azure, authorise an App Service to access that vault, and then deploy the SAFE app to that App Service. You will also need to set the KeyVaultName value in appsettings.json. By default, these will be loaded if you are in a Staging or Production environment.
+
+## Running the application
 
 Before you run the project **for the first time only** you should install its local tools with this command:
 
@@ -22,17 +32,10 @@ To concurrently run the server and the client components in watch mode use the f
 
 ```bash
 dotnet fake build -t run
-``
+```
 
 Then open `http://localhost:8080` in your browser.
 
-To run concurrently server and client tests in watch mode (run in a new terminal):
-
-```bash
-dotnet fake build -t runtests
-```
-
-Client tests are available under `http://localhost:8081` in your browser and server tests are running in watch mode in console.
 
 ## SAFE Stack Documentation
 
