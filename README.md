@@ -16,7 +16,7 @@ You'll need to install the following pre-requisites in order to build SAFE appli
 
 There are a couple of settings already configured in appsettings.json and appsettings.Development.json for demonstration purposes. You can see how changing your environment affects the final configuration provided to the app.
 
-To see values from local secrets, you will need to initialise a secret store as explained in the blog post. By default, these will be loaded if you are in a Development environment.
+To see values from local secrets, you will need to initialise a secret store as explained in the [blog post](https://www.compositional-it.com/news-blog/configuration-secrets-and-keyvault-with-asp-net-core/). By default, these will be loaded if you are in a Development environment.
 
 To access values from Key Vault you will need to set up a Key Vault instance in Azure, authorise an App Service to access that vault, and then deploy the SAFE app to that App Service. You will also need to set the KeyVaultName value in appsettings.json. By default, these will be loaded if you are in a Staging or Production environment.
 
