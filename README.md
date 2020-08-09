@@ -1,6 +1,6 @@
 # SAFE Configuration in ASP .NET Core
 
-This is an example project to accompany an upcoming blog on our website (link will be provided once published).
+This is an example project to accompany a [blog on our website](https://www.compositional-it.com/news-blog/configuration-secrets-and-keyvault-with-asp-net-core/).
 
 It allows you to explore the configuration of a simple SAFE application by searching for settings using their keys.
 
